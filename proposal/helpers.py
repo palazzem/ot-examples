@@ -3,7 +3,7 @@ to put these classes and functions as part of the main proposal.
 """
 import threading
 
-from proposal import Tracer, tracer
+from proposal import tracer
 
 
 class TracedThread(threading.Thread):
