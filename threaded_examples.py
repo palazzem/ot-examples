@@ -9,11 +9,16 @@ import threading
 from proposal import tracer, helpers
 
 
+# set the ThreadActiveSpanSource for those examples
+# TODO: move it somewhere else
+tracer._active_span_source = helpers.ThreadActiveSpanSource()
+
+
 def main_thread_instrumented_only():
     """The main thread is instrumented but not its children."""
     def do_some_work():
-        # code executed in children threads
-        pass
+        # code executed in children threads; they don't have an ActiveSpan
+        assert tracer.active_span_source.active_span() is None
 
     # code executed in the main thread
     with tracer.start_active(operation_name='main_thread') as span:
@@ -33,6 +38,7 @@ def main_thread_instrumented_children_continue():
     def do_some_work():
         # code executed in children threads; it must continue
         # the trace started in another thread
+        assert tracer.active_span_source.active_span() is not None
         with tracer.start_active(operation_name='child_thread') as span:
             pass
 
@@ -55,6 +61,7 @@ def main_thread_instrumented_children_not_continue():
     def do_some_work():
         # code executed in children threads; it doesn't continue
         # the trace started in another thread
+        assert tracer.active_span_source.active_span() is None
         with tracer.start_active(operation_name='child_thread') as span:
             pass
 
@@ -65,8 +72,9 @@ def main_thread_instrumented_children_not_continue():
             t.start()
 
         # ...do more work in the main thread...
-        for t in threads:
-            t.join(timeout=1)
+
+    for t in threads:
+        t.join(timeout=1)
 
 
 def main_thread_not_instrumented_children():
@@ -76,6 +84,7 @@ def main_thread_not_instrumented_children():
     def do_some_work():
         # code executed in children threads; it doesn't continue
         # the trace started in another thread
+        assert tracer.active_span_source.active_span() is None
         with tracer.start_active(operation_name='child_thread') as span:
             pass
 
