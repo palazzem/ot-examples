@@ -19,6 +19,23 @@ class Tracer(OTBaseTracer):
     def active_span_source(self):
         return self._active_span_source
 
+    def start_active(self, operation_name, tags=None, start_time=None):
+        # implementation detail
+        # get the current Span (or None)
+        parent_span = self.active_span_source.active_span()
+
+        # create a new Span child (if a parent is available)
+        span = self.start_span(
+            operation_name=operation_name,
+            child_of=parent_span,
+            tags=tags,
+            start_time=start_time,
+        )
+
+        # set it as active Span
+        self.active_span_source.make_active(span)
+        return span
+
 
 class BaseActiveSpanSource(object):
     """BaseActiveSpanSource is the interface for a pluggable class that
