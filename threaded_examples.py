@@ -7,11 +7,12 @@ the exact use case.
 import threading
 
 from proposal import tracer, helpers
+from proposal.active_span_source import ThreadActiveSpanSource
 
 
 # set the ThreadActiveSpanSource for those examples
-# TODO: move it somewhere else
-tracer._active_span_source = helpers.ThreadActiveSpanSource()
+# TODO: move this init somewhere else
+tracer._active_span_source = ThreadActiveSpanSource()
 
 
 def main_thread_instrumented_only():
