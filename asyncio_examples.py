@@ -7,12 +7,12 @@ the exact use case.
 import asyncio
 
 from proposal import tracer, helpers
-from proposal.active_span_source import NoopActiveSpanSource
+from proposal.active_span_source import AsyncioActiveSpanSource
 
 
 # set the NoopActiveSpanSource for those examples
 # TODO: move it somewhere else
-tracer._active_span_source = NoopActiveSpanSource()
+tracer._active_span_source = AsyncioActiveSpanSource()
 
 
 def coroutine_continue_propagation():
@@ -36,15 +36,15 @@ def coroutine_continue_propagation():
 def coroutine_with_callbacks():
     def success():
         span = tracer.active_span_source.active_span()
-        if span:
-            span.set_tag('result', 'success')
-            span.finish()
+        assert span is not None
+        span.set_tag('result', 'success')
+        span.finish()
 
     def failure():
         span = tracer.active_span_source.active_span()
-        if span:
-            span.set_tag('result', 'failure')
-            span.finish()
+        assert span is not None
+        span.set_tag('result', 'failure')
+        span.finish()
 
     async def do_async_work(cb_success, cb_failure):
         # executed in the main thread; do some IO-bound work
