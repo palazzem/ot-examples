@@ -7,8 +7,7 @@ from proposal import tracer
 from proposal.active_span_source import AsyncioActiveSpanSource
 
 
-# set the NoopActiveSpanSource for those examples
-# TODO: move it somewhere else
+# use a specific ActiveSpanSource implementation
 tracer._active_span_source = AsyncioActiveSpanSource()
 
 
