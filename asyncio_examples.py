@@ -1,8 +1,5 @@
 """Context propagation examples when dealing with single-threaded
 asyncio loops. It uses the Python 3.5+ syntax for simplicity.
-
-TODO: provide a better description for each example describing
-the exact use case.
 """
 import asyncio
 
@@ -16,6 +13,10 @@ tracer._active_span_source = AsyncioActiveSpanSource()
 
 
 def coroutine_continue_propagation():
+    """The asyncio loop executes two chained coroutines; the second
+    traced coroutine is a child of the first coroutine even if a
+    cooperative yield happens.
+    """
     async def do_async_work():
         # executed in the main thread
         with tracer.start_active(operation_name='some_work'):
@@ -34,6 +35,12 @@ def coroutine_continue_propagation():
 
 
 def coroutine_with_callbacks():
+    """The asyncio loop executes two chained coroutines with the
+    second one that expects a success callback (that is also a
+    coroutine). The callback that may be scheduled later because of
+    two cooperative yields, retrieves the right ActiveSpan, setting
+    a tag and finishing the Span.
+    """
     async def success():
         span = tracer.active_span_source.active_span()
         assert span is not None
