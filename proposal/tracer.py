@@ -3,12 +3,10 @@ from opentracing.tracer import Tracer as OTBaseTracer
 from .active_span_source import NoopActiveSpanSource
 
 
-class Tracer(OTBaseTracer):
-    """Tracer class that provides some extension to the base OpenTracing
-    API for Python. This class must define all new / updated API
-    so that they can be used in some examples.
-
-    Defined methods must be implemented as noop for the moment.
+class TracerProposal(OTBaseTracer):
+    """Tracer class that provides some extensions to the Python OpenTracing
+    API. This class includes all methods that may be added to the OT Tracer
+    class, so that the proposed interface is public accessible.
     """
     def __init__(self):
         # create the tracer as defined in OpenTracing `Tracer` class
@@ -22,7 +20,7 @@ class Tracer(OTBaseTracer):
         return self._active_span_source
 
     def start_active(self, operation_name, tags=None, start_time=None):
-        # implementation detail
+        """The body of the method is an implementation detail"""
         # get the current Span (or None)
         parent_span = self.active_span_source.active_span()
 
@@ -38,20 +36,29 @@ class Tracer(OTBaseTracer):
         self.active_span_source.make_active(span)
         return span
 
+
+class TracerExample(TracerProposal):
+    """Tracer class example that is not part of the proposal. The purpose
+    of this class is to list some implementation details tha may be needed
+    when developing a real tracer.
+    """
     def record(self, span):
-        """This method is an implementation detail and it's not part of the
-        API proposal. It has been taken from the `basictracer-python`,
+        """This method has been taken from the `basictracer-python`,
         adding a over-simplified interaction when the ActiveSpan is finished
         and then recorded.
+
+        This code is not a working solution, but it's here only to give the
+        idea that Frameworks and Applications developers should not take
+        care of choosing the right ActiveSpan.
+
+        In general, when a Span is finished, its parent must be reactivated
+        automatically. This consideration is valid only for synchronous
+        applications, and it will not work when using executions models (i.e.
+        async) where the finishing order is not guaranteed. In that case,
+        another Span will be reactivated according to the ActiveSpanSource
+        specific implementation.
         """
         # Deactivate the current ActiveSpan, using the specific ActiveSpanSource
         # implementation to choose the proper way to reactivate the right parent.
-        # This code is not a working solution but it's here only to give the
-        # idea that Frameworks and Applications developers should not take
-        # care of choosing the right ActiveSpan calling manually other methods.
-        # In general, when a Span is finished, its parent must be reactivated
-        # automatically. This consideration is valid only for synchronous
-        # applications, and it will not work when using executions models (i.e.
-        # async) where the finishing order is not guaranteed.
         self.active_span_source.make_active(span._parent)
         self.recorder.record_span(span)
