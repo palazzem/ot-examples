@@ -6,7 +6,7 @@ the exact use case.
 """
 import asyncio
 
-from proposal import tracer, helpers
+from proposal import tracer
 from proposal.active_span_source import AsyncioActiveSpanSource
 
 
@@ -34,33 +34,25 @@ def coroutine_continue_propagation():
 
 
 def coroutine_with_callbacks():
-    def success():
+    async def success():
         span = tracer.active_span_source.active_span()
         assert span is not None
         span.set_tag('result', 'success')
         span.finish()
 
-    def failure():
-        span = tracer.active_span_source.active_span()
-        assert span is not None
-        span.set_tag('result', 'failure')
-        span.finish()
-
-    async def do_async_work(cb_success, cb_failure):
+    async def do_async_work(cb_success):
         # executed in the main thread; do some IO-bound work
         span = tracer.start_active(operation_name='some_work')
         is_success = True
         if is_success:
-            cb_success()
-        else:
-            cb_failure()
+            await cb_success()
 
         # ...do more work that is not traced in some_work span...
 
     async def execute_job():
         # executed in the main thread
         with tracer.start_active(operation_name='execute_job'):
-            await do_async_work(success, failure)
+            await do_async_work(success)
             # ...do more work in this loop...
 
     loop = asyncio.get_event_loop()
