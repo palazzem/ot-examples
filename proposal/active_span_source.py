@@ -25,7 +25,7 @@ class NoopActiveSpanSource(BaseActiveSpanSource):
         return None
 
 
-class ThreadActiveSpanSource():
+class ThreadActiveSpanSource(BaseActiveSpanSource):
     """This is a simplified implementation to make the multi-threading
     examples work as expected. It uses a thread local storage to keep
     track of the current ActiveSpan available in this thread execution.
