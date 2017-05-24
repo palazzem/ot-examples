@@ -46,7 +46,7 @@ class ThreadActiveSpanSource():
         return getattr(self._locals, 'active_span', None)
 
 
-class AsyncioActiveSpanSource():
+class AsyncioActiveSpanSource(BaseActiveSpanSource):
     """This is a simplified implementation to make the asyncio examples
     work as expected. It uses the current Task instance as a carrier
     for of the current ActiveSpan available in this execution.
