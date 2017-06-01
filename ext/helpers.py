@@ -1,6 +1,6 @@
 import threading
 
-from proposal import tracer
+from ext import tracer
 
 
 class TracedThread(threading.Thread):

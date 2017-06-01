@@ -3,8 +3,8 @@ applications.
 """
 import threading
 
-from proposal import tracer, helpers
-from proposal.active_span_source import ThreadActiveSpanSource
+from ext import tracer, helpers
+from ext.active_span_source import ThreadActiveSpanSource
 
 
 # use a specific ActiveSpanSource implementation
@@ -93,11 +93,3 @@ def main_thread_not_instrumented_children():
     # ...do more work in the main thread...
     for t in threads:
         t.join(timeout=1)
-
-
-# will be moved somewhere else to keep the module only with examples
-if __name__ == '__main__':
-    main_thread_instrumented_only()
-    main_thread_instrumented_children_continue()
-    main_thread_instrumented_children_not_continue()
-    main_thread_not_instrumented_children()
