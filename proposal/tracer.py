@@ -11,7 +11,7 @@ class Tracer(OTBaseTracer):
     def __init__(self):
         # create the tracer as defined in OpenTracing `Tracer` class
         super(Tracer, self).__init__()
-        # this class may be changed when the vendor specific
+        # this instance may be changed when the vendor specific
         # implementation is initialized
         self._active_span_source = NoopActiveSpanSource()
 
@@ -20,7 +20,9 @@ class Tracer(OTBaseTracer):
         return self._active_span_source
 
     def start_active(self, operation_name, tags=None, start_time=None):
-        """The body of the method is an implementation detail"""
+        """This is a simplified implementation to start a new Span
+        that is marked as active.
+        """
         # get the current Span (or None)
         parent_span = self.active_span_source.active_span()
 
