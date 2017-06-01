@@ -4,11 +4,6 @@ applications.
 import threading
 
 from ext import tracer, helpers
-from ext.active_span_source import ThreadActiveSpanSource
-
-
-# use a specific ActiveSpanSource implementation
-tracer._active_span_source = ThreadActiveSpanSource()
 
 
 def main_thread_instrumented_only():

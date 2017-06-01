@@ -4,11 +4,6 @@ asyncio loops. It uses the Python 3.5+ syntax for simplicity.
 import asyncio
 
 from ext import tracer
-from ext.active_span_source import AsyncioActiveSpanSource
-
-
-# use a specific ActiveSpanSource implementation
-tracer._active_span_source = AsyncioActiveSpanSource()
 
 
 def coroutine_continue_propagation():
