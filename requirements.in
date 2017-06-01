@@ -3,3 +3,6 @@ opentracing
 
 # libraries
 gevent
+
+# frameworks
+tornado
