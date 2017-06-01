@@ -1,6 +1,3 @@
-"""Helpers that are used in examples. In the current state, we may not require
-to put these classes and functions as part of the main proposal.
-"""
 import threading
 
 from proposal import tracer

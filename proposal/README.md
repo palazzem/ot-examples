@@ -1,7 +1,5 @@
 # Python API Proposal
 
-**Note: this is a Work in Progress**
-
-This Python module includes a proposal for OpenTracing context
-propagation. While these changes are here only for an open
-discussion, they're used in the examples of this repository.
+This Python package includes a proposal for OpenTracing context
+propagation. All modules here must be considered as an extension for
+the current OpenTracing Python API.
