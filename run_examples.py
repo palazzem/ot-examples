@@ -3,12 +3,11 @@ from ext.active_span_source import (
     AsyncioActiveSpanSource,
     ThreadActiveSpanSource,
     GeventActiveSpanSource,
+    TornadoActiveSpanSource,
 )
 
-from examples import asyncio, multi_threaded, gevent
-
-
-# use a specific ActiveSpanSource implementation
+from tornado.ioloop import IOLoop
+from examples import asyncio, multi_threaded, gevent, tornado
 
 
 if __name__ == '__main__':
@@ -30,3 +29,8 @@ if __name__ == '__main__':
     gevent.main_greenlet_instrumented_children_continue()
     gevent.main_greenlet_instrumented_children_not_continue()
     gevent.main_greenlet_not_instrumented_children()
+
+    # tornado (starts / stops the loop for each call)
+    tracer._active_span_source = TornadoActiveSpanSource()
+    IOLoop.current().run_sync(tornado.coroutines_propagation)
+    IOLoop.current().run_sync(tornado.coroutines_without_propagation)
