@@ -3,8 +3,8 @@ asyncio loops. It uses the Python 3.5+ syntax for simplicity.
 """
 import asyncio
 
-from proposal import tracer
-from proposal.active_span_source import AsyncioActiveSpanSource
+from ext import tracer
+from ext.active_span_source import AsyncioActiveSpanSource
 
 
 # use a specific ActiveSpanSource implementation
@@ -64,8 +64,3 @@ def coroutine_with_callbacks():
     loop = asyncio.get_event_loop()
     future = loop.create_task(execute_job())
     loop.run_until_complete(future)
-
-
-if __name__ == '__main__':
-    coroutine_continue_propagation()
-    coroutine_with_callbacks()
