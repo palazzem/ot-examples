@@ -56,3 +56,34 @@ def coroutines_without_propagation():
 
     # the propagation doesn't happen
     return entrypoint()
+
+
+def coroutine_with_a_callback():
+    """The Tornado loop executes a child coroutine that starts a new
+    active Span. Later on, that Span is retrieved and finished from a
+    callback that is called when the coroutine is done.
+    """
+
+    @gen.coroutine
+    def coroutine():
+        # starts a new active Span
+        tracer.start_active(operation_name='coroutine_child')
+
+    @gen.coroutine
+    def entrypoint():
+
+        # callback that closes the active Span
+        def on_finish(f):
+            active_span = tracer.active_span_source.active_span()
+            assert active_span is not None
+            active_span.finish()
+
+        # creating a future from the coroutine function, and then adding
+        # a callback that is executed when the future is done
+        future = coroutine()
+        future.add_done_callback(on_finish)
+        yield future
+
+    # the callback will be executed within the TracerStackContext
+    with TracerStackContext():
+        return entrypoint()

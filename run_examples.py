@@ -34,3 +34,4 @@ if __name__ == '__main__':
     tracer._active_span_source = TornadoActiveSpanSource()
     IOLoop.current().run_sync(tornado.coroutines_propagation)
     IOLoop.current().run_sync(tornado.coroutines_without_propagation)
+    IOLoop.current().run_sync(tornado.coroutine_with_a_callback)
