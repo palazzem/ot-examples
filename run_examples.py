@@ -35,3 +35,5 @@ if __name__ == '__main__':
     IOLoop.current().run_sync(tornado.coroutines_propagation)
     IOLoop.current().run_sync(tornado.coroutines_without_propagation)
     IOLoop.current().run_sync(tornado.coroutine_with_a_callback)
+    IOLoop.current().run_sync(tornado.tornado_plain_callback)
+    IOLoop.current().run_sync(tornado.tornado_spawn_callback)

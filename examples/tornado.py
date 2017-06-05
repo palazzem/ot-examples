@@ -87,3 +87,56 @@ def coroutine_with_a_callback():
     # the callback will be executed within the TracerStackContext
     with TracerStackContext():
         return entrypoint()
+
+
+def tornado_plain_callback():
+    """The tornado loop executes the entrypoint coroutine that starts
+    a new active Span. Later on, a generic callback is added to the IOLoop
+    that retrieves and closes the previous created Span.
+    """
+    @gen.engine
+    def on_finish():
+        # callback that closes the active Span
+        active_span = tracer.active_span_source.active_span()
+        assert active_span is not None
+        active_span.finish()
+
+    @gen.coroutine
+    def entrypoint():
+        # starts a new active Span immediately
+        tracer.start_active(operation_name='coroutine')
+
+        # we simply set a generic callback in the IOLoop; this one
+        # will be executed as soon as the IOLoop is available and it's
+        # not related to the current execution of entrypoint
+        IOLoop.current().add_callback(on_finish)
+
+    # the callback will be executed within the TracerStackContext
+    with TracerStackContext():
+        return entrypoint()
+
+
+def tornado_spawn_callback():
+    """The tornado loop executes the entrypoint coroutine that starts
+    a new active Span. Later on, a callback that doesn't inherit the StackContext
+    is added to the IOLoop. This callback doesn't inherit the active Span
+    and it is meant to work in that way by design.
+    """
+    @gen.engine
+    def on_finish():
+        # this callback doesn't inherit the active Span from the
+        # other coroutine
+        active_span = tracer.active_span_source.active_span()
+        assert active_span is None
+
+    @gen.coroutine
+    def entrypoint():
+        # starts a new active Span immediately
+        tracer.start_active(operation_name='coroutine')
+
+        # we spawn a fire-and-forget callback that (by definition)
+        # must not interfere with the caller coroutine
+        IOLoop.current().spawn_callback(on_finish)
+
+    with TracerStackContext():
+        return entrypoint()
