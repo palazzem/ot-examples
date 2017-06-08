@@ -9,6 +9,9 @@ class BaseActiveSpanSource(object):
     def active_span(self, span):
         raise NotImplementedError
 
+    def deactivate(self, span):
+        raise NotImplementedError
+
 
 class NoopActiveSpanSource(BaseActiveSpanSource):
     """ActiveSpanSource provides the logic to get and set the current
@@ -19,4 +22,7 @@ class NoopActiveSpanSource(BaseActiveSpanSource):
         return None
 
     def active_span(self):
+        return None
+
+    def deactivate(self, span):
         return None
