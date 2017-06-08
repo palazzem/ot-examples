@@ -1,7 +1,7 @@
-from opentracing.span import Span as OTBaseTracer
+from opentracing.span import Span as OTBaseSpan
 
 
-class Span(OTBaseTracer):
+class Span(OTBaseSpan):
     """Span class that provides some extensions to the Python OpenTracing API.
     This class includes all methods that may be added to the OT Span class,
     so that the proposed interface is public accessible
