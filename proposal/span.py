@@ -7,21 +7,19 @@ class Span(OTBaseSpan):
     so that the proposed interface is public accessible
     """
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """Ends context manager and calls finish() on the span.
-        If exception has occurred during execution, it is automatically added
-        as a tag to the span.
+    def __init__(self, tracer, context):
+        self._tracer = tracer
+        self._context = context
+        self._deactivate_on_finish = False
 
-        Note: this method extends the current context manager
+    def finish(self, finish_time=None):
+        """Indicates that the work represented by this span has completed or
+        terminated. When the `Span` is finished, it must be deactivated from the
+        ActiveSpanSource that generated it.
+        With the exception of the `Span.context` property, the semantics of all
+        other Span methods are undefined after `finish()` has been invoked.
+        :param finish_time: an explicit Span finish timestamp as a unix
+            timestamp per time.time()
         """
-        if exc_type:
-            self.log_kv({
-                'python.exception.type': exc_type,
-                'python.exception.val': exc_val,
-                'python.exception.tb': exc_tb,
-                })
-
-        # when the context manager is closed, we deactivate the current
-        # active Span before calling the finish()
-        self._tracer.active_span_source.deactivate(self)
-        self.finish()
+        if self._deactivate_on_finish:
+            self._tracer.active_span_source.deactivate(self)

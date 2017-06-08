@@ -45,6 +45,9 @@ class AsyncioActiveSpanSource(BaseActiveSpanSource):
         task = asyncio.Task.current_task(loop=loop)
         setattr(task, '__active_span', span)
 
+        # explicitly set the flag for automatic deactivation
+        span._deactivate_on_finish = True
+
     def active_span(self, loop=None):
         # implementation detail
         # retrieves the current running loop if not provided
