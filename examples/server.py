@@ -7,7 +7,7 @@ A python program that encapsulates a range of cases OpenTracing must support:
 """
 import asyncio
 
-from ext import tracer
+from ext import tracer, helpers
 from ext.active_span_source import AsyncioActiveSpanSource
 
 
@@ -39,10 +39,15 @@ def get_data():
     # THIS FUNCTION ILLUSTRATES COMPLEX ASYNC BEHAVIOUR WHERE DEVELOPERS NEED MORE MANUAL CONTROL
 
     # kick off a background job that we will not block on (e.g. send an email)
-    asyncio.ensure_future(notification_email())
+    helpers.ensure_future(notification_email())
 
     # start two pieces of data concurrently (i.e. query two databases)
-    return asyncio.gather(*[coro_db_1(), coro_db_2()])
+    db_calls = [
+        helpers.ensure_future(coro_db_1()),
+        helpers.ensure_future(coro_db_2()),
+    ]
+
+    return asyncio.gather(*db_calls)
 
 
 async def handle_request():

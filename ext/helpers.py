@@ -1,4 +1,5 @@
 import gevent
+import asyncio
 import threading
 
 from ext import tracer
@@ -40,3 +41,19 @@ class TracedGreenlet(gevent.Greenlet):
         tracer.active_span_source.make_active(self._active_span)
         del self._active_span
         super(TracedGreenlet, self).run()
+
+
+def ensure_future(coro_or_future, *, loop=None):
+    """
+    Wrapper for the asyncio.ensure_future() function that
+    sets a context to the newly created Task. If the current
+    task already has a Context, it will be attached to the
+    new Task so the Trace list will be preserved.
+    """
+    # create the task
+    task = asyncio.ensure_future(coro_or_future, loop=loop)
+
+    # propagate the context
+    active_span = tracer.active_span_source.active_span
+    setattr(task, '__active_span', active_span)
+    return task
