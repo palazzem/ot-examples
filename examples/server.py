@@ -30,7 +30,7 @@ async def coro_db_2():
 
 async def notification_email():
     # this notification is a background Task that doesn't become the active Span
-    request_span = tracer.active_span_source.active_span
+    request_span = tracer.active_span
     with tracer.start_manual_span("notification.enqueue", child_of=request_span):
         await asyncio.sleep(0.8)
 

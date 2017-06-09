@@ -16,7 +16,7 @@ def coroutines_propagation():
     """
     @gen.coroutine
     def coroutine_child():
-        active_span = tracer.active_span_source.active_span
+        active_span = tracer.active_span
         assert active_span is not None
         with tracer.start_active_span(operation_name='coroutine_child'):
             pass
@@ -43,7 +43,7 @@ def coroutines_without_propagation():
     """
     @gen.coroutine
     def coroutine_child():
-        active_span = tracer.active_span_source.active_span
+        active_span = tracer.active_span
         assert active_span is None
         with tracer.start_active_span(operation_name='coroutine_child'):
             pass
@@ -74,7 +74,7 @@ def coroutine_with_a_callback():
 
         # callback that closes the active Span
         def on_finish(f):
-            active_span = tracer.active_span_source.active_span
+            active_span = tracer.active_span
             assert active_span is not None
             active_span.finish()
 
@@ -97,7 +97,7 @@ def tornado_plain_callback():
     @gen.engine
     def on_finish():
         # callback that closes the active Span
-        active_span = tracer.active_span_source.active_span
+        active_span = tracer.active_span
         assert active_span is not None
         active_span.finish()
 
@@ -126,7 +126,7 @@ def tornado_spawn_callback():
     def on_finish():
         # this callback doesn't inherit the active Span from the
         # other coroutine
-        active_span = tracer.active_span_source.active_span
+        active_span = tracer.active_span
         assert active_span is None
 
     @gen.coroutine

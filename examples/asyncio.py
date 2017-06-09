@@ -36,7 +36,7 @@ def coroutine_with_callbacks():
     a tag and finishing the Span.
     """
     async def success():
-        span = tracer.active_span_source.active_span
+        span = tracer.active_span
         assert span is not None
         span.set_tag('result', 'success')
         span.finish()
