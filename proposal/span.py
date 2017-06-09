@@ -7,9 +7,8 @@ class Span(OTBaseSpan):
     so that the proposed interface is public accessible
     """
 
-    def __init__(self, tracer, context):
-        self._tracer = tracer
-        self._context = context
+    def __init__(self, *args, **kwargs):
+        super(Span, self).__init__(*args, **kwargs)
         self._deactivate_on_finish = False
 
     def finish(self, finish_time=None):
@@ -28,3 +27,5 @@ class Span(OTBaseSpan):
         """
         if self._deactivate_on_finish and self._tracer:
             self._tracer.active_span_source.deactivate(self)
+
+        super(Span, self).finish(finish_time=finish_time)

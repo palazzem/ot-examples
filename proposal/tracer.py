@@ -20,17 +20,12 @@ class Tracer(OTBaseTracer):
     def active_span_source(self):
         return self._active_span_source
 
-    def start_manual_span(self,
-                          operation_name=None,
-                          child_of=None,
-                          references=None,
-                          tags=None,
-                          start_time=None):
+    def start_manual_span(self, *args, **kwargs):
         """This method supersede the original start_span. When developers
         use that method, a new Span is created without changing the current
         Span stack.
         """
-        return self._noop_span
+        return self.start_span(*args, **kwargs)
 
     def start_active_span(self, operation_name, tags=None, start_time=None):
         """This is a simplified implementation to start a new Span
