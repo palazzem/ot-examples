@@ -11,7 +11,7 @@ class TracedThread(threading.Thread):
     def __init__(self, *args, **kwargs):
         # implementation detail
         # get the ActiveSpan when we're in the "parent" thread
-        self._active_span = tracer.active_span_source.active_span()
+        self._active_span = tracer.active_span_source.active_span
         super(TracedThread, self).__init__(*args, **kwargs)
 
     def run(self):
@@ -28,7 +28,7 @@ class TracedGreenlet(gevent.Greenlet):
     """
     def __init__(self, *args, **kwargs):
         # get the current active span when we're in the "parent" greenlet
-        self._active_span = tracer.active_span_source.active_span()
+        self._active_span = tracer.active_span_source.active_span
 
         # create the Greenlet as usual
         super(TracedGreenlet, self).__init__(*args, **kwargs)

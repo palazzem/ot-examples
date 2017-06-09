@@ -10,7 +10,7 @@ def main_greenlet_instrumented_only():
     """The main greenlet is instrumented but not its children."""
     def do_some_work():
         # code executed in children greenlets; they don't have an ActiveSpan
-        assert tracer.active_span_source.active_span() is None
+        assert tracer.active_span_source.active_span is None
 
     # code executed in the main greenlet
     with tracer.start_active_span(operation_name='main_greenlet') as span:
@@ -25,7 +25,7 @@ def main_greenlet_instrumented_children_continue():
     def do_some_work():
         # code executed in children greenlets; it must continue
         # the trace started in another greenlet
-        assert tracer.active_span_source.active_span() is not None
+        assert tracer.active_span_source.active_span is not None
         with tracer.start_active_span(operation_name='child_greenlet') as span:
             pass
 
@@ -43,7 +43,7 @@ def main_greenlet_instrumented_children_not_continue():
     def do_some_work():
         # code executed in children greenlets; it doesn't continue
         # the trace started in another greenlet
-        assert tracer.active_span_source.active_span() is None
+        assert tracer.active_span_source.active_span is None
         with tracer.start_active_span(operation_name='child_greenlet') as span:
             pass
 
@@ -62,7 +62,7 @@ def main_greenlet_not_instrumented_children():
     def do_some_work():
         # code executed in children greenlets; it doesn't continue
         # the trace started in another greenlet
-        assert tracer.active_span_source.active_span() is None
+        assert tracer.active_span_source.active_span is None
         with tracer.start_active_span(operation_name='child_greenlet') as span:
             pass
 

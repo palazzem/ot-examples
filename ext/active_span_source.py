@@ -18,12 +18,30 @@ class ThreadActiveSpanSource(BaseActiveSpanSource):
         self._locals = threading.local()
 
     def make_active(self, span):
-        # implementation detail
+        # get the current active span and set the ancestor active Span
+        to_restore = self.active_span
+        setattr(span, '_to_restore', to_restore)
+
+        # set the current active Span
         setattr(self._locals, 'active_span', span)
 
+        # explicitly set the flag for automatic deactivation
+        span._deactivate_on_finish = True
+
+    @property
     def active_span(self):
-        # implementation detail
         return getattr(self._locals, 'active_span', None)
+
+    def deactivate(self, span):
+        # get the current active span and skip if the current active branch
+        # is not the one we're trying to deactivate
+        active = self.active_span
+        if span is not active:
+            return
+
+        # get span to restore and reactivate it
+        to_restore = getattr(span, '_to_restore', None)
+        setattr(self._locals, 'active_span', to_restore)
 
 
 class AsyncioActiveSpanSource(BaseActiveSpanSource):
@@ -34,13 +52,12 @@ class AsyncioActiveSpanSource(BaseActiveSpanSource):
     Here we store the `active_span` but it could be anything else that
     is used by Tracer developers.
     """
-    def make_active(self, span, loop=None):
-        # implementation detail
+    def make_active(self, span):
         # retrieves the current running loop if not provided
-        loop = loop or asyncio.get_event_loop()
+        loop = asyncio.get_event_loop()
 
         # get the current active span and set the ancestor active Span
-        to_restore = self.active_span(loop=loop)
+        to_restore = self.active_span
         setattr(span, '_to_restore', to_restore)
 
         # get the current running Task and set a new Span
@@ -50,23 +67,22 @@ class AsyncioActiveSpanSource(BaseActiveSpanSource):
         # explicitly set the flag for automatic deactivation
         span._deactivate_on_finish = True
 
-    def active_span(self, loop=None):
-        # implementation detail
+    @property
+    def active_span(self):
         # retrieves the current running loop if not provided
-        loop = loop or asyncio.get_event_loop()
+        loop = asyncio.get_event_loop()
 
         # get the current running Task for this loop and return the ActiveSpan
         task = asyncio.Task.current_task(loop=loop)
         return getattr(task, '__active_span', None)
 
-    def deactivate(self, span, loop=None):
-        # implementation detail
+    def deactivate(self, span):
         # retrieves the current running loop if not provided
-        loop = loop or asyncio.get_event_loop()
+        loop = asyncio.get_event_loop()
 
-        # get the current active span and ignore if the current active branch
+        # get the current active span and skip if the current active branch
         # is not the one we're trying to deactivate
-        active = self.active_span(loop=loop)
+        active = self.active_span
         if span is not active:
             return
 
@@ -90,12 +106,30 @@ class GeventActiveSpanSource(BaseActiveSpanSource):
         self._locals = gevent.local.local()
 
     def make_active(self, span):
-        # implementation detail
+        # get the current active span and set the ancestor active Span
+        to_restore = self.active_span
+        setattr(span, '_to_restore', to_restore)
+
+        # set the current active Span
         setattr(self._locals, 'active_span', span)
 
+        # explicitly set the flag for automatic deactivation
+        span._deactivate_on_finish = True
+
+    @property
     def active_span(self):
-        # implementation detail
         return getattr(self._locals, 'active_span', None)
+
+    def deactivate(self, span):
+        # get the current active span and skip if the current active branch
+        # is not the one we're trying to deactivate
+        active = self.active_span
+        if span is not active:
+            return
+
+        # get span to restore and reactivate it
+        to_restore = getattr(span, '_to_restore', None)
+        setattr(self._locals, 'active_span', to_restore)
 
 
 class TornadoActiveSpanSource(BaseActiveSpanSource):
@@ -104,13 +138,41 @@ class TornadoActiveSpanSource(BaseActiveSpanSource):
     may find better carriers than crafted ones.
     """
     def make_active(self, span):
-        # implementation detail
         data = TracerStackContext.current_data()
-        if data is not None:
-            data['active_span'] = span
+        # safe-guard if we're tracing outside a TracingStackContext;
+        # we may find a better solution in a real implementation
+        if data is None:
+            return
 
+        # get the current active span and set the ancestor active Span
+        to_restore = self.active_span
+        setattr(span, '_to_restore', to_restore)
+
+        # set the current active Span
+        data['active_span'] = span
+
+        # explicitly set the flag for automatic deactivation
+        span._deactivate_on_finish = True
+
+    @property
     def active_span(self):
-        # implementation detail
         data = TracerStackContext.current_data()
         if data is not None:
             return data.get('active_span')
+
+    def deactivate(self, span):
+        data = TracerStackContext.current_data()
+        # safe-guard if we're tracing outside a TracingStackContext;
+        # we may find a better solution in a real implementation
+        if data is None:
+            return
+
+        # get the current active span and skip if the current active branch
+        # is not the one we're trying to deactivate
+        active = self.active_span
+        if span is not active:
+            return
+
+        # get span to restore and reactivate it
+        to_restore = getattr(span, '_to_restore', None)
+        data['active_span'] = to_restore
