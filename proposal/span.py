@@ -14,12 +14,17 @@ class Span(OTBaseSpan):
 
     def finish(self, finish_time=None):
         """Indicates that the work represented by this span has completed or
-        terminated. When the `Span` is finished, it must be deactivated from the
-        ActiveSpanSource that generated it.
+        terminated.
+
         With the exception of the `Span.context` property, the semantics of all
         other Span methods are undefined after `finish()` has been invoked.
+
+        If the `Span` has been created using the in-process context
+        propagation, it will be automatically deactivated from the current
+        `ActiveSpanSource`.
+
         :param finish_time: an explicit Span finish timestamp as a unix
             timestamp per time.time()
         """
-        if self._deactivate_on_finish:
+        if self._deactivate_on_finish and self._tracer:
             self._tracer.active_span_source.deactivate(self)

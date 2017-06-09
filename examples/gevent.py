@@ -13,7 +13,7 @@ def main_greenlet_instrumented_only():
         assert tracer.active_span_source.active_span() is None
 
     # code executed in the main greenlet
-    with tracer.start_active(operation_name='main_greenlet') as span:
+    with tracer.start_active_span(operation_name='main_greenlet') as span:
         greenlets = [gevent.spawn(do_some_work) for _ in range(5)]
         gevent.joinall(greenlets)
 
@@ -26,11 +26,11 @@ def main_greenlet_instrumented_children_continue():
         # code executed in children greenlets; it must continue
         # the trace started in another greenlet
         assert tracer.active_span_source.active_span() is not None
-        with tracer.start_active(operation_name='child_greenlet') as span:
+        with tracer.start_active_span(operation_name='child_greenlet') as span:
             pass
 
     # code executed in the main greenlet
-    with tracer.start_active(operation_name='main_greenlet') as span:
+    with tracer.start_active_span(operation_name='main_greenlet') as span:
         greenlets = [helpers.TracedGreenlet.spawn(do_some_work) for _ in range(5)]
         gevent.joinall(greenlets)
 
@@ -44,11 +44,11 @@ def main_greenlet_instrumented_children_not_continue():
         # code executed in children greenlets; it doesn't continue
         # the trace started in another greenlet
         assert tracer.active_span_source.active_span() is None
-        with tracer.start_active(operation_name='child_greenlet') as span:
+        with tracer.start_active_span(operation_name='child_greenlet') as span:
             pass
 
     # code executed in the main greenlet
-    with tracer.start_active(operation_name='main_greenlet') as span:
+    with tracer.start_active_span(operation_name='main_greenlet') as span:
         greenlets = [gevent.spawn(do_some_work) for _ in range(5)]
 
     # don't wait for greenlets execution
@@ -63,7 +63,7 @@ def main_greenlet_not_instrumented_children():
         # code executed in children greenlets; it doesn't continue
         # the trace started in another greenlet
         assert tracer.active_span_source.active_span() is None
-        with tracer.start_active(operation_name='child_greenlet') as span:
+        with tracer.start_active_span(operation_name='child_greenlet') as span:
             pass
 
     # code executed in the main greenlet

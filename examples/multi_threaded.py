@@ -13,7 +13,7 @@ def main_thread_instrumented_only():
         assert tracer.active_span_source.active_span() is None
 
     # code executed in the main thread
-    with tracer.start_active(operation_name='main_thread') as span:
+    with tracer.start_active_span(operation_name='main_thread') as span:
         threads = [threading.Thread(target=do_some_work) for _ in range(5)]
         for t in threads:
             t.start()
@@ -31,11 +31,11 @@ def main_thread_instrumented_children_continue():
         # code executed in children threads; it must continue
         # the trace started in another thread
         assert tracer.active_span_source.active_span() is not None
-        with tracer.start_active(operation_name='child_thread') as span:
+        with tracer.start_active_span(operation_name='child_thread') as span:
             pass
 
     # code executed in the main thread
-    with tracer.start_active(operation_name='main_thread') as span:
+    with tracer.start_active_span(operation_name='main_thread') as span:
         threads = [helpers.TracedThread(target=do_some_work) for _ in range(5)]
         for t in threads:
             t.start()
@@ -54,11 +54,11 @@ def main_thread_instrumented_children_not_continue():
         # code executed in children threads; it doesn't continue
         # the trace started in another thread
         assert tracer.active_span_source.active_span() is None
-        with tracer.start_active(operation_name='child_thread') as span:
+        with tracer.start_active_span(operation_name='child_thread') as span:
             pass
 
     # code executed in the main thread
-    with tracer.start_active(operation_name='main_thread') as span:
+    with tracer.start_active_span(operation_name='main_thread') as span:
         threads = [threading.Thread(target=do_some_work) for _ in range(5)]
         for t in threads:
             t.start()
@@ -77,7 +77,7 @@ def main_thread_not_instrumented_children():
         # code executed in children threads; it doesn't continue
         # the trace started in another thread
         assert tracer.active_span_source.active_span() is None
-        with tracer.start_active(operation_name='child_thread') as span:
+        with tracer.start_active_span(operation_name='child_thread') as span:
             pass
 
     # code executed in the main thread

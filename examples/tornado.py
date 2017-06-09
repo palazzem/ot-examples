@@ -18,12 +18,12 @@ def coroutines_propagation():
     def coroutine_child():
         active_span = tracer.active_span_source.active_span()
         assert active_span is not None
-        with tracer.start_active(operation_name='coroutine_child'):
+        with tracer.start_active_span(operation_name='coroutine_child'):
             pass
 
     @gen.coroutine
     def entrypoint():
-        with tracer.start_active(operation_name='coroutine_parent') as span:
+        with tracer.start_active_span(operation_name='coroutine_parent') as span:
             coro = [coroutine_child() for i in range(5)]
             yield coro
 
@@ -45,12 +45,12 @@ def coroutines_without_propagation():
     def coroutine_child():
         active_span = tracer.active_span_source.active_span()
         assert active_span is None
-        with tracer.start_active(operation_name='coroutine_child'):
+        with tracer.start_active_span(operation_name='coroutine_child'):
             pass
 
     @gen.coroutine
     def entrypoint():
-        with tracer.start_active(operation_name='coroutine_parent') as span:
+        with tracer.start_active_span(operation_name='coroutine_parent') as span:
             coro = [coroutine_child() for i in range(5)]
             yield coro
 
@@ -67,7 +67,7 @@ def coroutine_with_a_callback():
     @gen.coroutine
     def coroutine():
         # starts a new active Span
-        tracer.start_active(operation_name='coroutine_child')
+        tracer.start_active_span(operation_name='coroutine_child')
 
     @gen.coroutine
     def entrypoint():
@@ -104,7 +104,7 @@ def tornado_plain_callback():
     @gen.coroutine
     def entrypoint():
         # starts a new active Span immediately
-        tracer.start_active(operation_name='coroutine')
+        tracer.start_active_span(operation_name='coroutine')
 
         # we simply set a generic callback in the IOLoop; this one
         # will be executed as soon as the IOLoop is available and it's
@@ -132,7 +132,7 @@ def tornado_spawn_callback():
     @gen.coroutine
     def entrypoint():
         # starts a new active Span immediately
-        tracer.start_active(operation_name='coroutine')
+        tracer.start_active_span(operation_name='coroutine')
 
         # we spawn a fire-and-forget callback that (by definition)
         # must not interfere with the caller coroutine

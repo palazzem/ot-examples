@@ -8,6 +8,7 @@ class Tracer(OTBaseTracer):
     API. This class includes all methods that may be added to the OT Tracer
     class, so that the proposed interface is public accessible.
     """
+
     def __init__(self, *args, **kwargs):
         # create the tracer as defined in OpenTracing `Tracer` class
         super(Tracer, self).__init__(*args, **kwargs)
@@ -35,17 +36,17 @@ class Tracer(OTBaseTracer):
         """This is a simplified implementation to start a new Span
         that is marked as active.
         """
-        # get the current Span (or None)
-        parent_span = self.active_span_source.active_span()
+        # use an ActiveSpanSource to retrieve the current Span
+        parent_span = self.active_span_source.active_span
 
-        # create a new Span child (if a parent is available)
-        span = self.start_span(
+        # create a new root Span or a child if a parent is available
+        span = self.start_manual_span(
             operation_name=operation_name,
             child_of=parent_span,
             tags=tags,
             start_time=start_time,
         )
 
-        # set it as active Span
+        # set Span as active
         self.active_span_source.make_active(span)
         return span

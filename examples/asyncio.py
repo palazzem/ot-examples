@@ -13,13 +13,13 @@ def coroutine_continue_propagation():
     """
     async def do_async_work():
         # executed in the main thread
-        with tracer.start_active(operation_name='some_work'):
+        with tracer.start_active_span(operation_name='some_work'):
             # do some IO-bound work
             pass
 
     async def execute_job():
         # executed in the main thread
-        with tracer.start_active(operation_name='execute_job'):
+        with tracer.start_active_span(operation_name='execute_job'):
             await do_async_work()
             # ...do more work in this loop...
 
@@ -43,7 +43,7 @@ def coroutine_with_callbacks():
 
     async def do_async_work(cb_success):
         # executed in the main thread; do some IO-bound work
-        span = tracer.start_active(operation_name='some_work')
+        span = tracer.start_active_span(operation_name='some_work')
         is_success = True
         if is_success:
             await cb_success()
@@ -52,7 +52,7 @@ def coroutine_with_callbacks():
 
     async def execute_job():
         # executed in the main thread
-        with tracer.start_active(operation_name='execute_job'):
+        with tracer.start_active_span(operation_name='execute_job'):
             await do_async_work(success)
             # ...do more work in this loop...
 
