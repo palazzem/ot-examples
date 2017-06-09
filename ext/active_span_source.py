@@ -37,9 +37,16 @@ class AsyncioActiveSpanSource(BaseActiveSpanSource):
         # retrieves the current running loop if not provided
         loop = loop or asyncio.get_event_loop()
 
+        # get the current active span and set the ancestor active Span
+        to_restore = self.active_span(loop=loop)
+        setattr(span, '_to_restore', to_restore)
+
         # get the current running Task and set a new Span
         task = asyncio.Task.current_task(loop=loop)
         setattr(task, '__active_span', span)
+
+        # explicitly set the flag for automatic deactivation
+        span._deactivate_on_finish = True
 
     def active_span(self, loop=None):
         # implementation detail
@@ -49,3 +56,21 @@ class AsyncioActiveSpanSource(BaseActiveSpanSource):
         # get the current running Task for this loop and return the ActiveSpan
         task = asyncio.Task.current_task(loop=loop)
         return getattr(task, '__active_span', None)
+
+    def deactivate(self, span, loop=None):
+        # implementation detail
+        # retrieves the current running loop if not provided
+        loop = loop or asyncio.get_event_loop()
+
+        # get the current active span and ignore if the current active branch
+        # is not the one we're trying to deactivate
+        active = self.active_span(loop=loop)
+        if span is not active:
+            return
+
+        # get span to restore
+        to_restore = getattr(span, '_to_restore', None)
+
+        # restore it
+        task = asyncio.Task.current_task(loop=loop)
+        setattr(task, '__active_span', to_restore)
