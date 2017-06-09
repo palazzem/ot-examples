@@ -2,6 +2,7 @@ import asyncio
 import threading
 import gevent.local
 
+from ext.tornado.stack_context import TracerStackContext
 from proposal.active_span_source import BaseActiveSpanSource
 
 
@@ -76,6 +77,7 @@ class AsyncioActiveSpanSource(BaseActiveSpanSource):
         task = asyncio.Task.current_task(loop=loop)
         setattr(task, '__active_span', to_restore)
 
+
 class GeventActiveSpanSource(BaseActiveSpanSource):
     """This is a simplified implementation to make the gevent examples
     work as expected. It uses a greenlet local storage to keep track of
@@ -94,3 +96,21 @@ class GeventActiveSpanSource(BaseActiveSpanSource):
     def active_span(self):
         # implementation detail
         return getattr(self._locals, 'active_span', None)
+
+
+class TornadoActiveSpanSource(BaseActiveSpanSource):
+    """Implementation that makes use of a context-local `StackContext`
+    to persist the current ActiveSpan. This is an example and here we
+    may find better carriers than crafted ones.
+    """
+    def make_active(self, span):
+        # implementation detail
+        data = TracerStackContext.current_data()
+        if data is not None:
+            data['active_span'] = span
+
+    def active_span(self):
+        # implementation detail
+        data = TracerStackContext.current_data()
+        if data is not None:
+            return data.get('active_span')
